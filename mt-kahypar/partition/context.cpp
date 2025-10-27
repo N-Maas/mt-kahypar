@@ -503,7 +503,6 @@ namespace mt_kahypar {
       }
     }
 
-
     shared_memory.static_balancing_work_packages = std::clamp(shared_memory.static_balancing_work_packages, UL(4), UL(256));
 
     if ( partition.deterministic ) {
@@ -576,6 +575,14 @@ namespace mt_kahypar {
       if (switched) {
         print_warning("Switching to deterministic algorithm variants since deterministic mode is active");
       }
+    }
+
+    // check for quality features
+    if (!MT_KAHYPAR_HAS_QUALITY_FEATURES &&
+        (refinement.flows.algorithm != FlowAlgorithm::do_nothing || initial_partitioning.refinement.flows.algorithm != FlowAlgorithm::do_nothing)) {
+      throw InvalidParameterException(
+        "Quality partitioning (flow-based refinement) is deactivated. Add -DKAHYPAR_ENABLE_QUALITY_FEATURES=ON "
+        "to the cmake command and rebuild Mt-KaHyPar.");
     }
 
     if ( partition.instance_type == InstanceType::UNDEFINED ) {
