@@ -184,7 +184,7 @@ TYPED_TEST(ADeterministicJetRefiner, UpdatesImbalanceCorrectly) {
 TYPED_TEST(ADeterministicJetRefiner, DoesNotViolateBalanceConstraint) {
     mt_kahypar_partitioned_hypergraph_t phg = utils::partitioned_hg_cast(this->partitioned_hypergraph);
     this->refiner->refine(phg, {}, this->metrics, std::numeric_limits<double>::max());
-    ASSERT_LE(this->metrics.imbalance.imbalance_value, this->context.partition.epsilon + EPS);
+    ASSERT_TRUE(this->metrics.imbalance.isValidPartition());
 }
 
 TYPED_TEST(ADeterministicJetRefiner, UpdatesMetricsCorrectly) {
