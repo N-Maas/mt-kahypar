@@ -622,7 +622,7 @@ class InitialPartitioningDataContainer {
         }
         if ( !best_imbalance || partition._result._imbalance.isBetter(best_imbalance->_result._imbalance) ||
              (best_imbalance->_result._imbalance.isEqual(partition._result._imbalance) &&
-              best_objective->_result._objective > partition._result._objective)) {
+              best_imbalance->_result._objective > partition._result._objective)) {
           best_imbalance = &partition;
         }
         if ( !best_objective || best_objective->_result._objective > partition._result._objective ) {
