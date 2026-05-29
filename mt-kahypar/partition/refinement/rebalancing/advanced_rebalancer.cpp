@@ -449,6 +449,9 @@ namespace impl {
       bool success = phg.changeNodePart(
         _gain_cache, m.node, m.from, m.to,
         _context.partition.max_part_weights[m.to],
+        // Note: we don't explicitly exclude these nodes from being moved again. However, since the previously empty
+        // target blocks are not overloaded after the moves, these nodes won't be selected for the main rebalancing
+        // round and thus can not be moved a second time.
         [&] { _moves[global_move_id++] = m; },
         [&](const SynchronizedEdgeUpdate& sync_update) {
           attributed_gain += AttributedGains::gain(sync_update);
