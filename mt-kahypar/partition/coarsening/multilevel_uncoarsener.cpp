@@ -173,10 +173,11 @@ namespace mt_kahypar {
     parallel::scalable_vector<HypernodeID> dummy;
     mt_kahypar_partitioned_hypergraph_t phg = utils::partitioned_hg_cast(partitioned_hypergraph);
 
-    if ( _rebalancer && _context.refinement.rebalancing.algorithm != RebalancingAlgorithm::do_nothing ) {
+    ASSERT(_rebalancer);
+    if ( _context.refinement.rebalancing.algorithm != RebalancingAlgorithm::do_nothing ) {
       _rebalancer->initialize(phg);
     }
-    if (!metrics::isValidPartition(partitioned_hypergraph, _context)) {
+    if ( !metrics::isValidPartition(partitioned_hypergraph, _context) && _context.refinement.rebalancing.algorithm != RebalancingAlgorithm::do_nothing ) {
       _timer.start_timer("rebalance", "Rebalance");
       _rebalancer->refine(phg, dummy, _current_metrics, 0.0);
       _timer.stop_timer("rebalance");
