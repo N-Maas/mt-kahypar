@@ -36,7 +36,7 @@
 namespace mt_kahypar {
 
 template <typename GraphAndGainTypes>
-class RepairEmtpyBlocks {
+class RepairEmptyBlocks {
 private:
   using PartitionedHypergraph = typename GraphAndGainTypes::PartitionedHypergraph;
   using GainCache = typename GraphAndGainTypes::GainCache;
@@ -50,7 +50,7 @@ private:
   static constexpr size_t MAX_ROUNDS = 3;
 
  public:
-  explicit RepairEmtpyBlocks(const Context& context, GainCache& gain_cache);
+  explicit RepairEmptyBlocks(const Context& context, GainCache& gain_cache);
 
   // ! Repairs empty blocks of the partition with a fully deterministic algorithm.
   // ! Receives a lambda to actually apply the provided moves.

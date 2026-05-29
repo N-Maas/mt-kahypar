@@ -43,7 +43,7 @@ bool moveIsBetter(const Move& lhs, const Move& rhs) {
 }
 
 template <typename GraphAndGainTypes>
-RepairEmtpyBlocks<GraphAndGainTypes>::RepairEmtpyBlocks(const Context& context, GainCache& gain_cache):
+RepairEmptyBlocks<GraphAndGainTypes>::RepairEmptyBlocks(const Context& context, GainCache& gain_cache):
   _context(context),
   _gain_cache(gain_cache),
   _is_empty(),
@@ -53,7 +53,7 @@ RepairEmtpyBlocks<GraphAndGainTypes>::RepairEmtpyBlocks(const Context& context, 
   _prng(context.partition.seed) { }
 
 template <typename GraphAndGainTypes>
-void RepairEmtpyBlocks<GraphAndGainTypes>::computeEmptyParts(PartitionedHypergraph& phg) {
+void RepairEmptyBlocks<GraphAndGainTypes>::computeEmptyParts(PartitionedHypergraph& phg) {
   _is_empty.assign(_context.partition.k, false);
   _empty_parts.clear();
   for (PartitionID block = 0; block < _context.partition.k; ++block) {
@@ -94,7 +94,7 @@ void RepairEmtpyBlocks<GraphAndGainTypes>::computeEmptyParts(PartitionedHypergra
 }
 
 template <typename GraphAndGainTypes>
-void RepairEmtpyBlocks<GraphAndGainTypes>::computeBestMovesBlockIndependent(PartitionedHypergraph& phg) {
+void RepairEmptyBlocks<GraphAndGainTypes>::computeBestMovesBlockIndependent(PartitionedHypergraph& phg) {
   ALWAYS_ASSERT(GainComputation::is_independent_of_block);
   if constexpr (GainComputation::is_independent_of_block) {  // needed to access GainComputation::computeIsolatedBlockGain
     const bool gain_cache_initialized = _gain_cache.isInitialized();
@@ -148,7 +148,7 @@ void RepairEmtpyBlocks<GraphAndGainTypes>::computeBestMovesBlockIndependent(Part
 }
 
 template <typename GraphAndGainTypes>
-void RepairEmtpyBlocks<GraphAndGainTypes>::computeBestMovesIndividualBlockGains(PartitionedHypergraph& phg,
+void RepairEmptyBlocks<GraphAndGainTypes>::computeBestMovesIndividualBlockGains(PartitionedHypergraph& phg,
                                                                                 GainComputation& gain_computation) {
   ALWAYS_ASSERT(!GainComputation::is_independent_of_block);
 
@@ -219,7 +219,7 @@ void RepairEmtpyBlocks<GraphAndGainTypes>::computeBestMovesIndividualBlockGains(
 
 // explicitly instantiate so the compiler can generate them when compiling this cpp file
 namespace {
-  #define REPAIR_EMPTY_BLOCKS(X) RepairEmtpyBlocks<X>
+  #define REPAIR_EMPTY_BLOCKS(X) RepairEmptyBlocks<X>
 }
 
 INSTANTIATE_CLASS_WITH_VALID_TRAITS(REPAIR_EMPTY_BLOCKS)

@@ -62,7 +62,7 @@ class RepairEmptyBlocksTest : public Test {
   using TargetGraphFactory = typename ds::StaticGraph::Factory;
   using GainCache = typename GainTypes::GainCache;
   using GainComputation = typename GainTypes::GainComputation;
-  using MyRepairEmtpyBlocks = RepairEmtpyBlocks<GraphAndGainTypes<TypeTraits, GainTypes>>;
+  using MyRepairEmptyBlocks = RepairEmptyBlocks<GraphAndGainTypes<TypeTraits, GainTypes>>;
 
   RepairEmptyBlocksTest() :
           hypergraph(),
@@ -140,7 +140,7 @@ class RepairEmptyBlocksTest : public Test {
   }
 
   void setup() {
-    repair_empty_blocks = std::make_unique<MyRepairEmtpyBlocks>(context, gain_cache);
+    repair_empty_blocks = std::make_unique<MyRepairEmptyBlocks>(context, gain_cache);
     partitioned_hypergraph = PartitionedHypergraph(context.partition.k, hypergraph, parallel_tag_t());
     context.setupPartWeights(hypergraph.totalWeight());
 
@@ -166,7 +166,7 @@ class RepairEmptyBlocksTest : public Test {
   GainCache gain_cache;
   std::unique_ptr<GainComputation> gain_computation;
   std::unique_ptr<TargetGraph> target_graph;
-  std::unique_ptr<MyRepairEmtpyBlocks> repair_empty_blocks;
+  std::unique_ptr<MyRepairEmptyBlocks> repair_empty_blocks;
 };
 
 
