@@ -220,7 +220,7 @@ BalanceMetrics imbalance_impl(const PartitionedHypergraph& hypergraph,
     }
     if (part_weight == 0) {
       num_empty_parts++;
-      min_empty_part_weight = std::min(min_empty_part_weight, part_weight);
+      min_empty_part_weight = std::min(min_empty_part_weight, max_part_weights[i]);
     }
   }
 
