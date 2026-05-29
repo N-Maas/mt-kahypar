@@ -139,7 +139,7 @@ private:
   ds::Array<PosT> _pq_handles;
   ds::Array<int> _pq_id;
   ds::Array<rebalancer::NodeState> _node_state;
-  RepairEmtpyBlocks<GraphAndGainTypes> _repair_empty_blocks;
+  RepairEmptyBlocks<GraphAndGainTypes> _repair_empty_blocks;
 };
 
 }  // namespace mt_kahypar
