@@ -140,7 +140,7 @@ private:
     parallel::scalable_vector<ds::StreamingVector<rebalancer::RebalancingMove>> _tmp_potential_moves;
     parallel::scalable_vector<HypernodeWeight> _current_imbalance;
     parallel::scalable_vector<uint8_t> _block_has_only_heavy_vertices;
-    RepairEmtpyBlocks<GraphAndGainTypes> _repair_empty_blocks;
+    RepairEmptyBlocks<GraphAndGainTypes> _repair_empty_blocks;
 };
 
 }  // namespace kahypar
