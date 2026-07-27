@@ -28,8 +28,6 @@
 
 #pragma once
 
-#include <tbb/parallel_invoke.h>
-
 #include "mt-kahypar/definitions.h"
 #include "mt-kahypar/parallel/atomic_wrapper.h"
 #include "mt-kahypar/partition/coarsening/multilevel/multilevel_vertex_pair_rater.h"
@@ -44,39 +42,23 @@ class ConcurrentClusteringData {
     MATCHED = 2
   };
 
-  #define STATE(X) static_cast<uint8_t>(X)
   using AtomicMatchingState = parallel::IntegralAtomicWrapper<uint8_t>;
   using AtomicWeight = parallel::IntegralAtomicWrapper<HypernodeWeight>;
   using AtomicID = parallel::IntegralAtomicWrapper<HypernodeID>;
 
  public:
-  ConcurrentClusteringData(HypernodeID initial_num_nodes, const Context& context) :
-    _context(context),
-    _matching_state(),
-    _cluster_weight(),
-    _matching_partner() {
-    // Initialize internal data structures parallel
-    tbb::parallel_invoke([&] {
-      _matching_state.resize(initial_num_nodes);
-    }, [&] {
-      _cluster_weight.resize(initial_num_nodes);
-    }, [&] {
-      _matching_partner.resize(initial_num_nodes);
-    });
-  }
+  ConcurrentClusteringData(HypernodeID initial_num_nodes, const Context& context);
 
   ConcurrentClusteringData(const ConcurrentClusteringData&) = delete;
   ConcurrentClusteringData(ConcurrentClusteringData&&) = delete;
   ConcurrentClusteringData & operator= (const ConcurrentClusteringData &) = delete;
   ConcurrentClusteringData & operator= (ConcurrentClusteringData &&) = delete;
 
-  ~ConcurrentClusteringData() {
-    parallel::parallel_free(_matching_state, _cluster_weight, _matching_partner);
-  }
+  ~ConcurrentClusteringData();
 
   MT_KAHYPAR_ATTRIBUTE_ALWAYS_INLINE bool vertexIsUnmatched(const HypernodeID u) const {
     ASSERT(u < _matching_state.size());
-    return _matching_state[u] == STATE(MatchingState::UNMATCHED);
+    return _matching_state[u] == static_cast<uint8_t>(MatchingState::UNMATCHED);
   }
 
   MT_KAHYPAR_ATTRIBUTE_ALWAYS_INLINE const parallel::scalable_vector<AtomicWeight>& clusterWeight() const {

@@ -29,9 +29,34 @@
 #include "mt-kahypar/partition/coarsening/multilevel/concurrent_clustering_data.h"
 
 #include <tbb/parallel_for.h>
+#include <tbb/parallel_invoke.h>
 #include <tbb/parallel_reduce.h>
 
+#include "mt-kahypar/parallel/stl/scalable_vector.h"
+
+
+#define STATE(X) static_cast<uint8_t>(X)
+
 namespace mt_kahypar {
+
+ConcurrentClusteringData::ConcurrentClusteringData(HypernodeID initial_num_nodes, const Context& context) :
+  _context(context),
+  _matching_state(),
+  _cluster_weight(),
+  _matching_partner() {
+  // Initialize internal data structures parallel
+  tbb::parallel_invoke([&] {
+    _matching_state.resize(initial_num_nodes);
+  }, [&] {
+    _cluster_weight.resize(initial_num_nodes);
+  }, [&] {
+    _matching_partner.resize(initial_num_nodes);
+  });
+}
+
+ConcurrentClusteringData::~ConcurrentClusteringData() {
+  parallel::parallel_free(_matching_state, _cluster_weight, _matching_partner);
+}
 
 template<typename Hypergraph>
 void ConcurrentClusteringData::initializeCoarseningPass(Hypergraph& current_hg,
