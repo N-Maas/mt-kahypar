@@ -31,6 +31,7 @@
 #include <tbb/parallel_for.h>
 
 #include "mt-kahypar/definitions.h"
+#include "mt-kahypar/utils/exception.h"
 
 namespace mt_kahypar {
 
