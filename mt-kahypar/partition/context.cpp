@@ -139,7 +139,7 @@ namespace mt_kahypar {
       str << "  Two-Hop Threshold Factor:           " << params.two_hop_shrink_threshold << std::endl;
       str << "  Two-Hop Cluster Size:               " << params.two_hop_cluster_size << std::endl;
     } else if ( params.algorithm == CoarseningAlgorithm::multilevel_coarsener ) {
-      str << "  Two-Hop Threshold Factor:           " << (params.use_two_hop ? -1 : params.two_hop_shrink_threshold) << std::endl;
+      str << "  Two-Hop Threshold Factor:           " << (params.use_two_hop ? params.two_hop_shrink_threshold : -1) << std::endl;
     }
     if ( verbose && (params.algorithm == CoarseningAlgorithm::multilevel_coarsener
                      || params.algorithm == CoarseningAlgorithm::nlevel_coarsener) ) {
