@@ -186,7 +186,10 @@ void TwoHopClustering::matchVerticesInBucket(const Hypergraph& hg,
       ASSERT((j > i + 1 || cc.vertexIsUnmatched(bucket[i].hn)) && cc.vertexIsUnmatched(bucket[j].hn));
       // Note: cluster weight and fixed vertices are checked by `matchVertices` (might not succeed)
       // j must be left, since only the right node is allowed to already be matched
-      cc.matchVertices(hg, bucket[j].hn, bucket[i].hn, has_fixed_vertices);
+      bool success = cc.matchVertices(hg, bucket[j].hn, bucket[i].hn, has_fixed_vertices);
+      if (!success) {
+        break;
+      }
       offset++;
     }
     i += offset;
