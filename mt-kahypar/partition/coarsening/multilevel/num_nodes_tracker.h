@@ -28,9 +28,10 @@
 
 #pragma once
 
-#include "tbb/enumerable_thread_specific.h"
+#include <tbb/enumerable_thread_specific.h>
 
 #include "mt-kahypar/definitions.h"
+#include "mt-kahypar/parallel/atomic_wrapper.h"
 
 
 namespace mt_kahypar {
@@ -46,7 +47,7 @@ class NumNodesTracker {
     _num_nodes_update_threshold(0) { }
 
   HypernodeID currentNumNodes() const {
-    return _current_num_nodes;
+    return __atomic_load_n(&_current_num_nodes, __ATOMIC_RELAXED);
   }
 
   HypernodeID finalNumNodes() {
@@ -64,8 +65,7 @@ class NumNodesTracker {
   }
 
   void subtractNode(size_t num_threads, HypernodeID hierarchy_contraction_limit) {
-    HypernodeID& local_contracted_nodes = _contracted_nodes.local();
-    ++local_contracted_nodes;
+    HypernodeID local_contracted_nodes = __atomic_add_fetch(&_contracted_nodes.local(), 1, __ATOMIC_RELAXED);
 
     // To maintain the current number of nodes of the hypergraph each PE sums up
     // its number of contracted nodes locally. To compute the current number of
@@ -81,10 +81,15 @@ class NumNodesTracker {
     // increased by the new difference (in number of nodes) to the contraction limit
     // divided by the number of PEs.
     if (local_contracted_nodes >= _num_nodes_update_threshold.local()) {
-      _current_num_nodes = _initial_num_nodes - _contracted_nodes.combine(std::plus<HypernodeID>());
+      HypernodeID updated_num_nodes = _initial_num_nodes;
+      _contracted_nodes.combine_each([&](const HypernodeID& val) {
+        updated_num_nodes -= __atomic_load_n(&val, __ATOMIC_RELAXED);
+      });
+      __atomic_store_n(&_current_num_nodes, updated_num_nodes, __ATOMIC_RELAXED);
+
       const HypernodeID dist_to_contraction_limit =
-        _current_num_nodes > hierarchy_contraction_limit ?
-        _current_num_nodes - hierarchy_contraction_limit : 0;
+        updated_num_nodes > hierarchy_contraction_limit ?
+        updated_num_nodes - hierarchy_contraction_limit : 0;
       _num_nodes_update_threshold.local() += dist_to_contraction_limit / num_threads;
     }
   }
