@@ -47,6 +47,7 @@
 #include "mt-kahypar/partition/coarsening/policies/rating_heavy_node_penalty_policy.h"
 #include "mt-kahypar/partition/coarsening/policies/rating_score_policy.h"
 #include "mt-kahypar/utils/cast.h"
+#include "mt-kahypar/utils/exception.h"
 #include "mt-kahypar/utils/progress_bar.h"
 #include "mt-kahypar/utils/randomize.h"
 #include "mt-kahypar/utils/stats.h"
@@ -87,6 +88,16 @@ class MultilevelCoarsener : public ICoarsener,
     _pass_nr(0),
     _progress_bar(utils::cast<Hypergraph>(hypergraph).initialNumNodes(), 0, false),
     _enable_randomization(true) {
+    if (_context.coarsening.two_hop_shrink_threshold <= 1) {
+      throw InvalidParameterException("Value for c-two-hop-threshold too small, must be larger than 1");
+    }
+    if (_context.coarsening.minimum_shrink_factor <= 1) {
+      throw InvalidParameterException("Value for c-min-shrink-factor too small, must be larger than 1");
+    }
+    if (_context.coarsening.maximum_shrink_factor <= _context.coarsening.minimum_shrink_factor) {
+      throw InvalidParameterException("Value for c-max-shrink-factor too small, must be larger than c-min-shrink-factor");
+    }
+
     _progress_bar += _hg.numRemovedHypernodes();
     _current_vertices.resize(_hg.initialNumNodes());
   }
