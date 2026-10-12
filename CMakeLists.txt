@@ -91,7 +91,8 @@ option(KAHYPAR_DISABLE_PARLAY "Remove the parlay dependency. Might impact runnin
 
 # specific compile features/build properties
 option(KAHYPAR_USE_64_BIT_IDS "Enables 64-bit vertex and hyperedge IDs." OFF)
-option(KAHYPAR_USE_ADDRESS_SANITIZER "Adds address sanitizer to compile options." OFF)
+option(KAHYPAR_USE_ADDRESS_SANITIZER "Adds address sanitizer to debug compile options." OFF)
+option(KAHYPAR_USE_THREAD_SANITIZER "Adds thread sanitizer to debug compile options. Disables address sanitizer if enabled." OFF)
 option(KAHYPAR_ENABLE_EXTENDED_INSTRUCTIONS "Allows instructions that might not be fully portable: `-mcx16 -msse4.2 -mcrc32`" OFF)
 option(KAHYPAR_ENABLE_ARCH_COMPILE_OPTIMIZATIONS "Adds the compile flags `-mtune=native -march=native`, or `/arch:AVX` for `MSVC`" OFF)
 option(KAHYPAR_ENABLE_THREAD_PINNING "Enables thread pinning in Mt-KaHyPar." OFF)
@@ -157,6 +158,10 @@ endif()
 if(KAHYPAR_ENABLE_THREAD_PINNING AND KAHYPAR_DISABLE_HWLOC)
   message(WARNING "Thread pinning disabled since hwloc library is disabled.")
   set(KAHYPAR_ENABLE_THREAD_PINNING FALSE CACHE STRING "" FORCE)
+endif()
+if(KAHYPAR_USE_ADDRESS_SANITIZER AND KAHYPAR_USE_THREAD_SANITIZER)
+  message(WARNING "Disabling address sanitizer since thread sanitizer and address sanitizer can not be used together.")
+  set(KAHYPAR_USE_ADDRESS_SANITIZER FALSE CACHE STRING "" FORCE)
 endif()
 
 include(CopyDeps)
@@ -401,6 +406,15 @@ if(KAHYPAR_USE_ADDRESS_SANITIZER AND (NOT KAHYPAR_CI_BUILD))
   endif()
 endif()
 
+if(KAHYPAR_USE_THREAD_SANITIZER AND (NOT KAHYPAR_CI_BUILD) AND (NOT MSVC))
+  target_compile_options(MtKaHyPar-BuildFlags INTERFACE
+      $<$<CONFIG:Debug>:-fsanitize=thread>
+  )
+  target_link_options(MtKaHyPar-BuildFlags INTERFACE
+      $<$<CONFIG:Debug>:-fsanitize=thread>
+  )
+endif()
+
 
 #################################################################
 ## Setup of dependencies                                       ##
@@ -408,7 +422,7 @@ endif()
 
 include(FetchContent)
 set(KAHYPAR_SHARED_RESOURCES_TAG 6d5c8e2444e4310667ec1925e995f26179d7ee88)
-set(KAHYPAR_WHFC_TAG             dd3b7901f73ba9a1de44788172ded5ce33b83338)
+set(KAHYPAR_WHFC_TAG             52d3e5c710b7f5b890ae3f3e72a0fd92b5f724f1)
 set(KAHYPAR_PARLAY_TAG           e1f1dc0ccf930492a2723f7fbef8510d35bf57f5)
 set(KAHYPAR_CLI11_VERSION        v2.7.2)
 set(KAHYPAR_TBB_VERSION          v2022.0.0)
@@ -434,7 +448,7 @@ FetchContent_Populate(
 )
 FetchContent_Populate(
   WHFC QUIET EXLUDE_FROM_ALL
-  GIT_REPOSITORY https://github.com/larsgottesbueren/WHFC.git
+  GIT_REPOSITORY https://github.com/N-Maas/WHFC.git
   GIT_TAG        ${KAHYPAR_WHFC_TAG}
   SOURCE_DIR     external_tools/WHFC
 )
@@ -486,6 +500,9 @@ if(KAHYPAR_DOWNLOAD_TBB)
       set(BUILD_SHARED_LIBS ON)
     endif()
     set(TBB_TEST OFF CACHE BOOL "")
+    if(KAHYPAR_USE_THREAD_SANITIZER)
+      set(TBB_SANITIZE "thread" CACHE STRING "")
+    endif()
     FetchContent_MakeAvailable(TBB)
   endblock()
 else()
