@@ -37,14 +37,12 @@
 #include "include/mtkahypartypes.h"
 
 #include "kahypar-resources/meta/mandatory.h"
-#include "kahypar-resources/datastructure/fast_reset_flag_array.h"
 #include "kahypar-resources/utils/math.h"
 
 #include "mt-kahypar/datastructures/hypergraph_common.h"
 #include "mt-kahypar/datastructures/fixed_vertex_support.h"
 #include "mt-kahypar/datastructures/dynamic_adjacency_array.h"
 #include "mt-kahypar/datastructures/contraction_tree.h"
-#include "mt-kahypar/datastructures/thread_safe_fast_reset_flag_array.h"
 #include "mt-kahypar/parallel/atomic_wrapper.h"
 #include "mt-kahypar/parallel/stl/scalable_vector.h"
 #include "mt-kahypar/utils/memory_tree.h"
@@ -372,7 +370,6 @@ class DynamicGraph {
     _adjacency_array(std::move(other._adjacency_array)),
     _acquired_nodes(std::move(other._acquired_nodes)),
     _fixed_vertices(std::move(other._fixed_vertices)) {
-    _fixed_vertices.setHypergraph(this);
   }
 
   DynamicGraph & operator= (DynamicGraph&& other) {
@@ -387,7 +384,6 @@ class DynamicGraph {
     _adjacency_array = std::move(other._adjacency_array);
     _acquired_nodes = std::move(other._acquired_nodes);
     _fixed_vertices = std::move(other._fixed_vertices);
-    _fixed_vertices.setHypergraph(this);
     return *this;
   }
 
@@ -644,9 +640,8 @@ class DynamicGraph {
 
   // ####################### Fixed Vertex Support #######################
 
-  void addFixedVertexSupport(FixedVertexSupport<DynamicGraph>&& fixed_vertices) {
+  void addFixedVertexSupport(FixedVertexSupport&& fixed_vertices) {
     _fixed_vertices = std::move(fixed_vertices);
-    _fixed_vertices.setHypergraph(this);
   }
 
   bool hasFixedVertices() const {
@@ -673,11 +668,11 @@ class DynamicGraph {
     _fixed_vertices.setMaxBlockWeight(max_block_weights);
   }
 
-  const FixedVertexSupport<DynamicGraph>& fixedVertexSupport() const {
+  const FixedVertexSupport& fixedVertexSupport() const {
     return _fixed_vertices;
   }
 
-  FixedVertexSupport<DynamicGraph> copyOfFixedVertexSupport() const {
+  FixedVertexSupport copyOfFixedVertexSupport() const {
     return _fixed_vertices.copy();
   }
 
@@ -930,7 +925,7 @@ class DynamicGraph {
   OwnershipVector _acquired_nodes;
 
   // ! Fixed Vertex Support
-  FixedVertexSupport<DynamicGraph> _fixed_vertices;
+  FixedVertexSupport _fixed_vertices;
 };
 
 } // namespace ds
